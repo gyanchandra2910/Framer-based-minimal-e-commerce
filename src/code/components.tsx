@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { theme, styles } from "./theme"
-import { store } from "./store"
+import { store, googleSheetsService } from "./store"
 import { useState } from "react"
 
 // Main App Router Component
@@ -2201,19 +2201,36 @@ export const SignUpPage = ({ onNavigateHome, onNavigateToLogin }: SignUpPageProp
     const [lastName, setLastName] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
-    const handleSignUp = () => {
+    const handleSignUp = async () => {
         if (password !== confirmPassword) {
             alert("Passwords don't match!")
             return
         }
         
         setIsLoading(true)
-        // Simulate sign up process
-        setTimeout(() => {
+        
+        try {
+            // Simulate sign up process
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            // Send data to Google Sheets
+            console.log("🚀 Integrating with Google Sheets...")
+            const sheetsSuccess = await googleSheetsService.logSignup(email, firstName, lastName)
+            
+            if (sheetsSuccess) {
+                alert(`Account created successfully for ${firstName} ${lastName}!\n\n✅ User data has been logged to Google Sheets`)
+            } else {
+                alert(`Account created successfully for ${firstName} ${lastName}!\n\n⚠️ Note: Google Sheets logging encountered an issue`)
+            }
+            
             setIsLoading(false)
-            alert(`Account created successfully for ${firstName} ${lastName}!`)
             onNavigateToLogin()
-        }, 2000)
+            
+        } catch (error) {
+            console.error("Sign up error:", error)
+            setIsLoading(false)
+            alert("An error occurred during sign up. Please try again.")
+        }
     }
 
     return (
@@ -2605,19 +2622,36 @@ export const ForgotPasswordPage = ({ onNavigateHome, onNavigateToLogin }: Forgot
         setStep("reset")
     }
 
-    const handleResetPassword = () => {
+    const handleResetPassword = async () => {
         if (newPassword !== confirmPassword) {
             alert("Passwords don't match!")
             return
         }
         
         setIsLoading(true)
-        // Simulate password reset
-        setTimeout(() => {
+        
+        try {
+            // Simulate password reset process
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            
+            // Send data to Google Sheets
+            console.log("🚀 Logging password reset to Google Sheets...")
+            const sheetsSuccess = await googleSheetsService.logPasswordReset(email)
+            
+            if (sheetsSuccess) {
+                alert("Password reset successfully!\n\n✅ Password reset event has been logged to Google Sheets")
+            } else {
+                alert("Password reset successfully!\n\n⚠️ Note: Google Sheets logging encountered an issue")
+            }
+            
             setIsLoading(false)
-            alert("Password reset successfully!")
             onNavigateToLogin()
-        }, 1500)
+            
+        } catch (error) {
+            console.error("Password reset error:", error)
+            setIsLoading(false)
+            alert("An error occurred during password reset. Please try again.")
+        }
     }
 
     return (
