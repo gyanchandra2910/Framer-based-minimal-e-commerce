@@ -544,8 +544,15 @@ interface CategoryPageProps {
 }
 
 export const CategoryPage = ({ category, onNavigateHome, onNavigateToProduct }: CategoryPageProps) => {
+    const [searchQuery, setSearchQuery] = useState("")
     const categoryProducts = store.getProductsByCategory(category)
     const categoryInfo = store.categories.find(cat => cat.id === category)
+    
+    // Filter products based on search query
+    const filteredProducts = categoryProducts.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
 
     return (
         <div style={{
@@ -621,30 +628,205 @@ export const CategoryPage = ({ category, onNavigateHome, onNavigateToProduct }: 
                     </p>
                 </motion.div>
 
-                {/* Products Grid - 3 Column Responsive */}
+                {/* Search Section */}
                 <motion.div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-                        gap: theme.spacing.xl,
-                        justifyItems: "center"
-                    }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
+                    style={{ marginBottom: theme.spacing.xl }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                    {categoryProducts.map((product, index) => (
-                        <ProductCard 
-                            key={product.id} 
-                            product={product} 
-                            index={index}
-                            onNavigateToProduct={onNavigateToProduct}
-                            isClickable={true}
+                    <div style={{
+                        position: "relative",
+                        maxWidth: 600,
+                        margin: "0 auto"
+                    }}>
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: "100%",
+                                padding: `${theme.spacing.md}px ${theme.spacing.xl}px ${theme.spacing.md}px ${theme.spacing.xxl}px`,
+                                fontSize: 16,
+                                backgroundColor: theme.colors.surface,
+                                border: `2px solid ${theme.colors.border}`,
+                                borderRadius: theme.borderRadius.md,
+                                color: theme.colors.textPrimary,
+                                outline: "none",
+                                transition: "all 0.3s ease",
+                                fontFamily: theme.fonts.primary
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = theme.colors.primary;
+                                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = theme.colors.border;
+                                e.target.style.boxShadow = "none";
+                            }}
                         />
-                    ))}
+                        {/* Search Icon */}
+                        <div style={{
+                            position: "absolute",
+                            left: theme.spacing.lg,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            fontSize: 18,
+                            color: theme.colors.textMuted
+                        }}>
+                            🔍
+                        </div>
+                        {/* Clear button */}
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                style={{
+                                    position: "absolute",
+                                    right: theme.spacing.lg,
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: 16,
+                                    color: theme.colors.textMuted,
+                                    cursor: "pointer",
+                                    padding: theme.spacing.xs
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                    
+                    {/* Search Results Counter */}
+                    {searchQuery && (
+                        <motion.p
+                            style={{
+                                textAlign: "center",
+                                fontSize: 14,
+                                color: theme.colors.textSecondary,
+                                marginTop: theme.spacing.md,
+                                margin: `${theme.spacing.md}px auto 0`
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {filteredProducts.length > 0 
+                                ? `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} matching "${searchQuery}"`
+                                : `No products found matching "${searchQuery}"`
+                            }
+                        </motion.p>
+                    )}
                 </motion.div>
 
-                {categoryProducts.length === 0 && (
+                {/* Products Grid - 3 Column Responsive */}
+                {filteredProducts.length > 0 ? (
+                    <motion.div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                            gap: theme.spacing.xl,
+                            justifyItems: "center"
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                    >
+                        {filteredProducts.map((product, index) => (
+                            <ProductCard 
+                                key={product.id} 
+                                product={product} 
+                                index={index}
+                                onNavigateToProduct={onNavigateToProduct}
+                                isClickable={true}
+                            />
+                        ))}
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        style={{
+                            textAlign: "center",
+                            padding: `${theme.spacing.xxl * 2}px ${theme.spacing.lg}px`,
+                            color: theme.colors.textMuted
+                        }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        {searchQuery ? (
+                            <>
+                                <div style={{
+                                    fontSize: 64,
+                                    marginBottom: theme.spacing.lg,
+                                    opacity: 0.5
+                                }}>
+                                    🔍
+                                </div>
+                                <h3 style={{ 
+                                    fontSize: 28, 
+                                    marginBottom: theme.spacing.md,
+                                    color: theme.colors.textPrimary,
+                                    fontFamily: theme.fonts.heading
+                                }}>
+                                    No matching products found
+                                </h3>
+                                <p style={{
+                                    fontSize: 16,
+                                    marginBottom: theme.spacing.lg,
+                                    maxWidth: 400,
+                                    margin: `0 auto ${theme.spacing.lg}px`,
+                                    lineHeight: 1.5
+                                }}>
+                                    We couldn't find any products matching "<span style={{ color: theme.colors.primary, fontWeight: 600 }}>{searchQuery}</span>". 
+                                    Try adjusting your search terms or browse all products.
+                                </p>
+                                <motion.button
+                                    onClick={() => setSearchQuery("")}
+                                    style={{
+                                        ...styles.button.secondary,
+                                        fontSize: 14,
+                                        padding: `${theme.spacing.sm}px ${theme.spacing.lg}px`
+                                    }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Clear Search
+                                </motion.button>
+                            </>
+                        ) : (
+                            <>
+                                <div style={{
+                                    fontSize: 64,
+                                    marginBottom: theme.spacing.lg,
+                                    opacity: 0.5
+                                }}>
+                                    📦
+                                </div>
+                                <h3 style={{ 
+                                    fontSize: 28, 
+                                    marginBottom: theme.spacing.md,
+                                    color: theme.colors.textPrimary,
+                                    fontFamily: theme.fonts.heading
+                                }}>
+                                    Coming Soon
+                                </h3>
+                                <p style={{
+                                    fontSize: 16,
+                                    maxWidth: 400,
+                                    margin: "0 auto",
+                                    lineHeight: 1.5
+                                }}>
+                                    New products will be added to this category soon. Check back later for exciting F1-inspired streetwear!
+                                </p>
+                            </>
+                        )}
+                    </motion.div>
+                )}
+
+                {/* Legacy fallback - remove this when above is working */}
+                {categoryProducts.length === 0 && !searchQuery && (
                     <motion.div
                         style={{
                             textAlign: "center",
