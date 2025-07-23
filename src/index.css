@@ -1,0 +1,73 @@
+/* F1 Streetwear Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  /* F1 Racing Colors */
+  --f1-black: #0A0A0A;
+  --f1-surface: #1A1A1A;
+  --f1-surface-elevated: #2A2A2A;
+  --f1-red: #DC143C;
+  --f1-red-hover: #B8122E;
+  --f1-silver: #C0C0C0;
+  --f1-white: #FFFFFF;
+  --f1-gray: #CCCCCC;
+  --f1-gray-muted: #888888;
+  --f1-border: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--f1-black);
+  color: var(--f1-white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--f1-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--f1-red);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--f1-red-hover);
+}
+
+/* Selection */
+::selection {
+  background: var(--f1-red);
+  color: var(--f1-white);
+}
+
+/* Focus styles */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--f1-red);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
