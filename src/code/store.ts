@@ -170,5 +170,13 @@ export const store = {
     
     setSelectedCategory: (category: string | null) => {
         store.selectedCategory = category;
+    },
+    
+    setSelectedProduct: (product: Product | null) => {
+        store.selectedProduct = product;
+    },
+    
+    getProductById: (id: number) => {
+        return store.products.find(product => product.id === id);
     }
 }
