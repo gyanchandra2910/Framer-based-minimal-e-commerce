@@ -43,6 +43,33 @@ export const AppRouter = () => {
         store.setSelectedProduct(null)
     }
 
+    const navigateToLogin = () => {
+        setCurrentPage("login")
+        setSelectedCategory(null)
+        setSelectedProduct(null)
+        store.setCurrentPage("login")
+        store.setSelectedCategory(null)
+        store.setSelectedProduct(null)
+    }
+
+    const navigateToSignUp = () => {
+        setCurrentPage("signup")
+        setSelectedCategory(null)
+        setSelectedProduct(null)
+        store.setCurrentPage("signup")
+        store.setSelectedCategory(null)
+        store.setSelectedProduct(null)
+    }
+
+    const navigateToForgotPassword = () => {
+        setCurrentPage("forgot-password")
+        setSelectedCategory(null)
+        setSelectedProduct(null)
+        store.setCurrentPage("forgot-password")
+        store.setSelectedCategory(null)
+        store.setSelectedProduct(null)
+    }
+
     return (
         <div style={{
             backgroundColor: theme.colors.background,
@@ -52,6 +79,7 @@ export const AppRouter = () => {
             <Navigation 
                 onNavigateHome={navigateToHome}
                 onNavigateToCart={navigateToCart}
+                onNavigateToLogin={navigateToLogin}
                 currentPage={currentPage}
             />
             
@@ -87,6 +115,28 @@ export const AppRouter = () => {
                     onNavigateToCategory={navigateToCategory}
                 />
             )}
+
+            {currentPage === "login" && (
+                <LoginPage 
+                    onNavigateHome={navigateToHome}
+                    onNavigateToSignUp={navigateToSignUp}
+                    onNavigateToForgotPassword={navigateToForgotPassword}
+                />
+            )}
+
+            {currentPage === "signup" && (
+                <SignUpPage 
+                    onNavigateHome={navigateToHome}
+                    onNavigateToLogin={navigateToLogin}
+                />
+            )}
+
+            {currentPage === "forgot-password" && (
+                <ForgotPasswordPage 
+                    onNavigateHome={navigateToHome}
+                    onNavigateToLogin={navigateToLogin}
+                />
+            )}
         </div>
     )
 }
@@ -95,16 +145,16 @@ export const AppRouter = () => {
 interface NavigationProps {
     onNavigateHome: () => void;
     onNavigateToCart: () => void;
+    onNavigateToLogin: () => void;
     currentPage: string;
 }
 
-export const Navigation = ({ onNavigateHome, onNavigateToCart, currentPage }: NavigationProps) => {
+export const Navigation = ({ onNavigateHome, onNavigateToCart, onNavigateToLogin, currentPage }: NavigationProps) => {
     const navItems = [
         { label: "HOME", action: onNavigateHome },
         { label: "SHOP", action: () => {} },
         { label: "COLLECTIONS", action: () => {} },
-        { label: "ABOUT", action: () => {} },
-        { label: "CONTACT", action: () => {} }
+        { label: "ABOUT", action: () => {} }
     ]
 
     return (
@@ -179,42 +229,68 @@ export const Navigation = ({ onNavigateHome, onNavigateToCart, currentPage }: Na
                     ))}
                 </div>
 
-                {/* Cart Icon */}
-                <motion.div
-                    style={{
-                        position: "relative",
-                        cursor: "pointer"
-                    }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onNavigateToCart}
-                >
-                    <div style={{
-                        width: 24,
-                        height: 24,
-                        border: `2px solid ${currentPage === "cart" ? theme.colors.primary : theme.colors.textSecondary}`,
-                        borderRadius: theme.borderRadius.sm,
-                        position: "relative"
-                    }}>
+                {/* Login Button */}
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: theme.spacing.md
+                }}>
+                    <motion.button
+                        onClick={onNavigateToLogin}
+                        style={{
+                            ...styles.button.secondary,
+                            fontSize: 14,
+                            padding: `${theme.spacing.xs}px ${theme.spacing.md}px`,
+                            borderColor: currentPage === "login" || currentPage === "signup" || currentPage === "forgot-password" 
+                                ? theme.colors.primary 
+                                : theme.colors.border,
+                            color: currentPage === "login" || currentPage === "signup" || currentPage === "forgot-password"
+                                ? theme.colors.primary 
+                                : theme.colors.textSecondary
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        LOGIN
+                    </motion.button>
+
+                    {/* Cart Icon */}
+                    <motion.div
+                        style={{
+                            position: "relative",
+                            cursor: "pointer"
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onNavigateToCart}
+                    >
                         <div style={{
-                            position: "absolute",
-                            top: -8,
-                            right: -8,
-                            width: 20,
-                            height: 20,
-                            backgroundColor: theme.colors.primary,
-                            borderRadius: "50%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 10,
-                            fontWeight: 600,
-                            color: theme.colors.textPrimary
+                            width: 24,
+                            height: 24,
+                            border: `2px solid ${currentPage === "cart" ? theme.colors.primary : theme.colors.textSecondary}`,
+                            borderRadius: theme.borderRadius.sm,
+                            position: "relative"
                         }}>
-                            {store.cart.length}
+                            <div style={{
+                                position: "absolute",
+                                top: -8,
+                                right: -8,
+                                width: 20,
+                                height: 20,
+                                backgroundColor: theme.colors.primary,
+                                borderRadius: "50%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary
+                            }}>
+                                {store.cart.length}
+                            </div>
                         </div>
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </div>
             </div>
         </motion.nav>
     )
@@ -1841,5 +1917,1118 @@ export const CartItem = ({ item, index, onUpdateQuantity, onRemoveItem }: CartIt
                 🗑️
             </motion.button>
         </motion.div>
+    )
+}
+
+// Login Page Component
+interface LoginPageProps {
+    onNavigateHome: () => void;
+    onNavigateToSignUp: () => void;
+    onNavigateToForgotPassword: () => void;
+}
+
+export const LoginPage = ({ onNavigateHome, onNavigateToSignUp, onNavigateToForgotPassword }: LoginPageProps) => {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleLogin = () => {
+        setIsLoading(true)
+        // Simulate login process
+        setTimeout(() => {
+            setIsLoading(false)
+            alert(`Login successful for ${email}!`)
+            onNavigateHome()
+        }, 1500)
+    }
+
+    return (
+        <div style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: theme.spacing.lg,
+            background: `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.surface} 100%)`
+        }}>
+            <motion.div
+                style={{
+                    width: "100%",
+                    maxWidth: 450,
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius.lg,
+                    padding: theme.spacing.xxl,
+                    border: `1px solid ${theme.colors.border}`,
+                    boxShadow: theme.shadows.lg
+                }}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+                {/* Header */}
+                <div style={{ textAlign: "center", marginBottom: theme.spacing.xxl }}>
+                    <motion.h1
+                        style={{
+                            fontSize: 32,
+                            fontWeight: 900,
+                            fontFamily: theme.fonts.heading,
+                            color: theme.colors.textPrimary,
+                            margin: 0,
+                            marginBottom: theme.spacing.sm,
+                            letterSpacing: "0.05em"
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        WELCOME <span style={{ color: theme.colors.primary }}>BACK</span>
+                    </motion.h1>
+                    <motion.p
+                        style={{
+                            fontSize: 16,
+                            color: theme.colors.textSecondary,
+                            margin: 0
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        Sign in to your F1 Streetwear account
+                    </motion.p>
+                </div>
+
+                {/* Login Form */}
+                <motion.form
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        handleLogin()
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    {/* Email Field */}
+                    <div style={{ marginBottom: theme.spacing.lg }}>
+                        <label style={{
+                            display: "block",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: theme.colors.textPrimary,
+                            marginBottom: theme.spacing.sm
+                        }}>
+                            Email Address
+                        </label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: theme.spacing.md,
+                                fontSize: 16,
+                                backgroundColor: theme.colors.surfaceElevated,
+                                border: `2px solid ${theme.colors.border}`,
+                                borderRadius: theme.borderRadius.md,
+                                color: theme.colors.textPrimary,
+                                outline: "none",
+                                transition: "all 0.3s ease",
+                                fontFamily: theme.fonts.primary
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = theme.colors.primary;
+                                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = theme.colors.border;
+                                e.target.style.boxShadow = "none";
+                            }}
+                            placeholder="your@email.com"
+                        />
+                    </div>
+
+                    {/* Password Field */}
+                    <div style={{ marginBottom: theme.spacing.xl }}>
+                        <label style={{
+                            display: "block",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: theme.colors.textPrimary,
+                            marginBottom: theme.spacing.sm
+                        }}>
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: theme.spacing.md,
+                                fontSize: 16,
+                                backgroundColor: theme.colors.surfaceElevated,
+                                border: `2px solid ${theme.colors.border}`,
+                                borderRadius: theme.borderRadius.md,
+                                color: theme.colors.textPrimary,
+                                outline: "none",
+                                transition: "all 0.3s ease",
+                                fontFamily: theme.fonts.primary
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = theme.colors.primary;
+                                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = theme.colors.border;
+                                e.target.style.boxShadow = "none";
+                            }}
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    {/* Forgot Password Link */}
+                    <div style={{ 
+                        textAlign: "right", 
+                        marginBottom: theme.spacing.xl 
+                    }}>
+                        <button
+                            type="button"
+                            onClick={onNavigateToForgotPassword}
+                            style={{
+                                background: "none",
+                                border: "none",
+                                color: theme.colors.primary,
+                                fontSize: 14,
+                                cursor: "pointer",
+                                textDecoration: "underline"
+                            }}
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
+
+                    {/* Login Button */}
+                    <motion.button
+                        type="submit"
+                        disabled={isLoading}
+                        style={{
+                            ...styles.button.primary,
+                            width: "100%",
+                            fontSize: 16,
+                            padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                            marginBottom: theme.spacing.lg,
+                            opacity: isLoading ? 0.7 : 1
+                        }}
+                        whileHover={!isLoading ? { scale: 1.02 } : {}}
+                        whileTap={!isLoading ? { scale: 0.98 } : {}}
+                    >
+                        {isLoading ? "SIGNING IN..." : "SIGN IN"}
+                    </motion.button>
+
+                    {/* Sign Up Link */}
+                    <div style={{ textAlign: "center" }}>
+                        <p style={{
+                            fontSize: 14,
+                            color: theme.colors.textSecondary,
+                            margin: 0
+                        }}>
+                            Don't have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={onNavigateToSignUp}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: theme.colors.primary,
+                                    fontSize: 14,
+                                    cursor: "pointer",
+                                    textDecoration: "underline",
+                                    fontWeight: 600
+                                }}
+                            >
+                                Sign Up
+                            </button>
+                        </p>
+                    </div>
+                </motion.form>
+
+                {/* Back to Home */}
+                <motion.div
+                    style={{
+                        textAlign: "center",
+                        marginTop: theme.spacing.xl,
+                        paddingTop: theme.spacing.lg,
+                        borderTop: `1px solid ${theme.colors.border}`
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                    <button
+                        onClick={onNavigateHome}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: theme.colors.textSecondary,
+                            fontSize: 14,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: theme.spacing.xs,
+                            margin: "0 auto"
+                        }}
+                    >
+                        ← Back to Home
+                    </button>
+                </motion.div>
+            </motion.div>
+        </div>
+    )
+}
+
+// Sign Up Page Component
+interface SignUpPageProps {
+    onNavigateHome: () => void;
+    onNavigateToLogin: () => void;
+}
+
+export const SignUpPage = ({ onNavigateHome, onNavigateToLogin }: SignUpPageProps) => {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSignUp = () => {
+        if (password !== confirmPassword) {
+            alert("Passwords don't match!")
+            return
+        }
+        
+        setIsLoading(true)
+        // Simulate sign up process
+        setTimeout(() => {
+            setIsLoading(false)
+            alert(`Account created successfully for ${firstName} ${lastName}!`)
+            onNavigateToLogin()
+        }, 2000)
+    }
+
+    return (
+        <div style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: theme.spacing.lg,
+            background: `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.surface} 100%)`
+        }}>
+            <motion.div
+                style={{
+                    width: "100%",
+                    maxWidth: 500,
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius.lg,
+                    padding: theme.spacing.xxl,
+                    border: `1px solid ${theme.colors.border}`,
+                    boxShadow: theme.shadows.lg
+                }}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+                {/* Header */}
+                <div style={{ textAlign: "center", marginBottom: theme.spacing.xxl }}>
+                    <motion.h1
+                        style={{
+                            fontSize: 32,
+                            fontWeight: 900,
+                            fontFamily: theme.fonts.heading,
+                            color: theme.colors.textPrimary,
+                            margin: 0,
+                            marginBottom: theme.spacing.sm,
+                            letterSpacing: "0.05em"
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        JOIN THE <span style={{ color: theme.colors.primary }}>RACE</span>
+                    </motion.h1>
+                    <motion.p
+                        style={{
+                            fontSize: 16,
+                            color: theme.colors.textSecondary,
+                            margin: 0
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        Create your F1 Streetwear account
+                    </motion.p>
+                </div>
+
+                {/* Sign Up Form */}
+                <motion.form
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        handleSignUp()
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    {/* Name Fields */}
+                    <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: "1fr 1fr", 
+                        gap: theme.spacing.md,
+                        marginBottom: theme.spacing.lg 
+                    }}>
+                        <div>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                First Name
+                            </label>
+                            <input
+                                type="text"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="John"
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Last Name
+                            </label>
+                            <input
+                                type="text"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="Doe"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Email Field */}
+                    <div style={{ marginBottom: theme.spacing.lg }}>
+                        <label style={{
+                            display: "block",
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: theme.colors.textPrimary,
+                            marginBottom: theme.spacing.sm
+                        }}>
+                            Email Address
+                        </label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: theme.spacing.md,
+                                fontSize: 16,
+                                backgroundColor: theme.colors.surfaceElevated,
+                                border: `2px solid ${theme.colors.border}`,
+                                borderRadius: theme.borderRadius.md,
+                                color: theme.colors.textPrimary,
+                                outline: "none",
+                                transition: "all 0.3s ease",
+                                fontFamily: theme.fonts.primary
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.borderColor = theme.colors.primary;
+                                e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.borderColor = theme.colors.border;
+                                e.target.style.boxShadow = "none";
+                            }}
+                            placeholder="your@email.com"
+                        />
+                    </div>
+
+                    {/* Password Fields */}
+                    <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: "1fr 1fr", 
+                        gap: theme.spacing.md,
+                        marginBottom: theme.spacing.xl 
+                    }}>
+                        <div>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Confirm Password
+                            </label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Sign Up Button */}
+                    <motion.button
+                        type="submit"
+                        disabled={isLoading}
+                        style={{
+                            ...styles.button.primary,
+                            width: "100%",
+                            fontSize: 16,
+                            padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                            marginBottom: theme.spacing.lg,
+                            opacity: isLoading ? 0.7 : 1
+                        }}
+                        whileHover={!isLoading ? { scale: 1.02 } : {}}
+                        whileTap={!isLoading ? { scale: 0.98 } : {}}
+                    >
+                        {isLoading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
+                    </motion.button>
+
+                    {/* Login Link */}
+                    <div style={{ textAlign: "center" }}>
+                        <p style={{
+                            fontSize: 14,
+                            color: theme.colors.textSecondary,
+                            margin: 0
+                        }}>
+                            Already have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={onNavigateToLogin}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: theme.colors.primary,
+                                    fontSize: 14,
+                                    cursor: "pointer",
+                                    textDecoration: "underline",
+                                    fontWeight: 600
+                                }}
+                            >
+                                Sign In
+                            </button>
+                        </p>
+                    </div>
+                </motion.form>
+
+                {/* Back to Home */}
+                <motion.div
+                    style={{
+                        textAlign: "center",
+                        marginTop: theme.spacing.xl,
+                        paddingTop: theme.spacing.lg,
+                        borderTop: `1px solid ${theme.colors.border}`
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                    <button
+                        onClick={onNavigateHome}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: theme.colors.textSecondary,
+                            fontSize: 14,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: theme.spacing.xs,
+                            margin: "0 auto"
+                        }}
+                    >
+                        ← Back to Home
+                    </button>
+                </motion.div>
+            </motion.div>
+        </div>
+    )
+}
+
+// Forgot Password Page Component
+interface ForgotPasswordPageProps {
+    onNavigateHome: () => void;
+    onNavigateToLogin: () => void;
+}
+
+export const ForgotPasswordPage = ({ onNavigateHome, onNavigateToLogin }: ForgotPasswordPageProps) => {
+    const [step, setStep] = useState<"email" | "otp" | "reset">("email")
+    const [email, setEmail] = useState("")
+    const [otp, setOtp] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+    const [generatedOtp] = useState("123456") // Simulated OTP
+
+    const handleSendOtp = () => {
+        setIsLoading(true)
+        // Simulate OTP sending
+        setTimeout(() => {
+            setIsLoading(false)
+            setStep("otp")
+            alert(`OTP sent to ${email}! Use: ${generatedOtp}`)
+        }, 1500)
+    }
+
+    const handleVerifyOtp = () => {
+        if (otp !== generatedOtp) {
+            alert("Invalid OTP! Please try again.")
+            return
+        }
+        setStep("reset")
+    }
+
+    const handleResetPassword = () => {
+        if (newPassword !== confirmPassword) {
+            alert("Passwords don't match!")
+            return
+        }
+        
+        setIsLoading(true)
+        // Simulate password reset
+        setTimeout(() => {
+            setIsLoading(false)
+            alert("Password reset successfully!")
+            onNavigateToLogin()
+        }, 1500)
+    }
+
+    return (
+        <div style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: theme.spacing.lg,
+            background: `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.surface} 100%)`
+        }}>
+            <motion.div
+                style={{
+                    width: "100%",
+                    maxWidth: 450,
+                    backgroundColor: theme.colors.surface,
+                    borderRadius: theme.borderRadius.lg,
+                    padding: theme.spacing.xxl,
+                    border: `1px solid ${theme.colors.border}`,
+                    boxShadow: theme.shadows.lg
+                }}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+                {/* Header */}
+                <div style={{ textAlign: "center", marginBottom: theme.spacing.xxl }}>
+                    <motion.h1
+                        style={{
+                            fontSize: 32,
+                            fontWeight: 900,
+                            fontFamily: theme.fonts.heading,
+                            color: theme.colors.textPrimary,
+                            margin: 0,
+                            marginBottom: theme.spacing.sm,
+                            letterSpacing: "0.05em"
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        {step === "email" && <>FORGOT <span style={{ color: theme.colors.primary }}>PASSWORD</span></>}
+                        {step === "otp" && <>VERIFY <span style={{ color: theme.colors.primary }}>OTP</span></>}
+                        {step === "reset" && <>RESET <span style={{ color: theme.colors.primary }}>PASSWORD</span></>}
+                    </motion.h1>
+                    <motion.p
+                        style={{
+                            fontSize: 16,
+                            color: theme.colors.textSecondary,
+                            margin: 0
+                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        {step === "email" && "Enter your email to receive an OTP"}
+                        {step === "otp" && `Enter the OTP sent to ${email}`}
+                        {step === "reset" && "Create your new password"}
+                    </motion.p>
+                </div>
+
+                {/* Step Progress */}
+                <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    marginBottom: theme.spacing.xl,
+                    gap: theme.spacing.sm
+                }}>
+                    {["email", "otp", "reset"].map((stepName) => (
+                        <div
+                            key={stepName}
+                            style={{
+                                width: 40,
+                                height: 4,
+                                backgroundColor: step === stepName || 
+                                    (step === "otp" && stepName === "email") || 
+                                    (step === "reset" && (stepName === "email" || stepName === "otp"))
+                                    ? theme.colors.primary 
+                                    : theme.colors.border,
+                                borderRadius: 2,
+                                transition: "all 0.3s ease"
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Step 1: Email */}
+                {step === "email" && (
+                    <motion.form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            handleSendOtp()
+                        }}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div style={{ marginBottom: theme.spacing.xl }}>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="your@email.com"
+                            />
+                        </div>
+
+                        <motion.button
+                            type="submit"
+                            disabled={isLoading}
+                            style={{
+                                ...styles.button.primary,
+                                width: "100%",
+                                fontSize: 16,
+                                padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                                marginBottom: theme.spacing.lg,
+                                opacity: isLoading ? 0.7 : 1
+                            }}
+                            whileHover={!isLoading ? { scale: 1.02 } : {}}
+                            whileTap={!isLoading ? { scale: 0.98 } : {}}
+                        >
+                            {isLoading ? "SENDING OTP..." : "SEND OTP"}
+                        </motion.button>
+                    </motion.form>
+                )}
+
+                {/* Step 2: OTP Verification */}
+                {step === "otp" && (
+                    <motion.form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            handleVerifyOtp()
+                        }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div style={{ marginBottom: theme.spacing.xl }}>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Enter OTP
+                            </label>
+                            <input
+                                type="text"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                required
+                                maxLength={6}
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 24,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary,
+                                    textAlign: "center",
+                                    letterSpacing: "0.5em"
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="123456"
+                            />
+                            <p style={{
+                                fontSize: 12,
+                                color: theme.colors.textMuted,
+                                margin: `${theme.spacing.sm}px 0 0`,
+                                textAlign: "center"
+                            }}>
+                                Check your email for the 6-digit code
+                            </p>
+                        </div>
+
+                        <motion.button
+                            type="submit"
+                            style={{
+                                ...styles.button.primary,
+                                width: "100%",
+                                fontSize: 16,
+                                padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                                marginBottom: theme.spacing.md
+                            }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            VERIFY OTP
+                        </motion.button>
+
+                        <button
+                            type="button"
+                            onClick={() => setStep("email")}
+                            style={{
+                                ...styles.button.secondary,
+                                width: "100%",
+                                fontSize: 14,
+                                padding: `${theme.spacing.sm}px ${theme.spacing.md}px`
+                            }}
+                        >
+                            RESEND OTP
+                        </button>
+                    </motion.form>
+                )}
+
+                {/* Step 3: Password Reset */}
+                {step === "reset" && (
+                    <motion.form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            handleResetPassword()
+                        }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div style={{ marginBottom: theme.spacing.lg }}>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: theme.spacing.xl }}>
+                            <label style={{
+                                display: "block",
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: theme.colors.textPrimary,
+                                marginBottom: theme.spacing.sm
+                            }}>
+                                Confirm New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: theme.spacing.md,
+                                    fontSize: 16,
+                                    backgroundColor: theme.colors.surfaceElevated,
+                                    border: `2px solid ${theme.colors.border}`,
+                                    borderRadius: theme.borderRadius.md,
+                                    color: theme.colors.textPrimary,
+                                    outline: "none",
+                                    transition: "all 0.3s ease",
+                                    fontFamily: theme.fonts.primary
+                                }}
+                                onFocus={(e) => {
+                                    e.target.style.borderColor = theme.colors.primary;
+                                    e.target.style.boxShadow = `0 0 0 3px ${theme.colors.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.target.style.borderColor = theme.colors.border;
+                                    e.target.style.boxShadow = "none";
+                                }}
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <motion.button
+                            type="submit"
+                            disabled={isLoading}
+                            style={{
+                                ...styles.button.primary,
+                                width: "100%",
+                                fontSize: 16,
+                                padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                                marginBottom: theme.spacing.lg,
+                                opacity: isLoading ? 0.7 : 1
+                            }}
+                            whileHover={!isLoading ? { scale: 1.02 } : {}}
+                            whileTap={!isLoading ? { scale: 0.98 } : {}}
+                        >
+                            {isLoading ? "RESETTING..." : "RESET PASSWORD"}
+                        </motion.button>
+                    </motion.form>
+                )}
+
+                {/* Navigation Links */}
+                <div style={{ textAlign: "center" }}>
+                    <p style={{
+                        fontSize: 14,
+                        color: theme.colors.textSecondary,
+                        margin: 0,
+                        marginBottom: theme.spacing.md
+                    }}>
+                        Remember your password?{" "}
+                        <button
+                            type="button"
+                            onClick={onNavigateToLogin}
+                            style={{
+                                background: "none",
+                                border: "none",
+                                color: theme.colors.primary,
+                                fontSize: 14,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                fontWeight: 600
+                            }}
+                        >
+                            Sign In
+                        </button>
+                    </p>
+                </div>
+
+                {/* Back to Home */}
+                <motion.div
+                    style={{
+                        textAlign: "center",
+                        marginTop: theme.spacing.lg,
+                        paddingTop: theme.spacing.lg,
+                        borderTop: `1px solid ${theme.colors.border}`
+                    }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                    <button
+                        onClick={onNavigateHome}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: theme.colors.textSecondary,
+                            fontSize: 14,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: theme.spacing.xs,
+                            margin: "0 auto"
+                        }}
+                    >
+                        ← Back to Home
+                    </button>
+                </motion.div>
+            </motion.div>
+        </div>
     )
 }
