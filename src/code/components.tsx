@@ -34,6 +34,15 @@ export const AppRouter = () => {
         store.setSelectedProduct(null)
     }
 
+    const navigateToCart = () => {
+        setCurrentPage("cart")
+        setSelectedCategory(null)
+        setSelectedProduct(null)
+        store.setCurrentPage("cart")
+        store.setSelectedCategory(null)
+        store.setSelectedProduct(null)
+    }
+
     return (
         <div style={{
             backgroundColor: theme.colors.background,
@@ -42,6 +51,7 @@ export const AppRouter = () => {
         }}>
             <Navigation 
                 onNavigateHome={navigateToHome}
+                onNavigateToCart={navigateToCart}
                 currentPage={currentPage}
             />
             
@@ -70,6 +80,13 @@ export const AppRouter = () => {
                     }}
                 />
             )}
+
+            {currentPage === "cart" && (
+                <CartPage 
+                    onNavigateHome={navigateToHome}
+                    onNavigateToCategory={navigateToCategory}
+                />
+            )}
         </div>
     )
 }
@@ -77,10 +94,11 @@ export const AppRouter = () => {
 // Navigation Component
 interface NavigationProps {
     onNavigateHome: () => void;
+    onNavigateToCart: () => void;
     currentPage: string;
 }
 
-export const Navigation = ({ onNavigateHome, currentPage }: NavigationProps) => {
+export const Navigation = ({ onNavigateHome, onNavigateToCart, currentPage }: NavigationProps) => {
     const navItems = [
         { label: "HOME", action: onNavigateHome },
         { label: "SHOP", action: () => {} },
@@ -169,11 +187,12 @@ export const Navigation = ({ onNavigateHome, currentPage }: NavigationProps) => 
                     }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={onNavigateToCart}
                 >
                     <div style={{
                         width: 24,
                         height: 24,
-                        border: `2px solid ${theme.colors.textSecondary}`,
+                        border: `2px solid ${currentPage === "cart" ? theme.colors.primary : theme.colors.textSecondary}`,
                         borderRadius: theme.borderRadius.sm,
                         position: "relative"
                     }}>
@@ -1372,5 +1391,455 @@ export const ProductDetailPage = ({ product, onNavigateHome, onNavigateBack }: P
                 </div>
             </div>
         </div>
+    )
+}
+
+// Cart Page Component
+interface CartPageProps {
+    onNavigateHome: () => void;
+    onNavigateToCategory: (categoryId: string) => void;
+}
+
+export const CartPage = ({ onNavigateHome, onNavigateToCategory }: CartPageProps) => {
+    const [cartItems, setCartItems] = useState(store.cart)
+    
+    // Calculate subtotal
+    const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+    
+    // Update quantity for an item
+    const updateQuantity = (itemId: number, newQuantity: number) => {
+        if (newQuantity <= 0) {
+            // Remove item if quantity is 0 or less
+            store.removeFromCart(itemId)
+        } else {
+            // Update quantity
+            store.updateCartItemQuantity(itemId, newQuantity)
+        }
+        setCartItems([...store.cart]) // Force re-render
+    }
+    
+    // Remove item from cart
+    const removeItem = (itemId: number) => {
+        store.removeFromCart(itemId)
+        setCartItems([...store.cart]) // Force re-render
+    }
+
+    return (
+        <div style={{
+            minHeight: "100vh",
+            padding: `${theme.spacing.xxl}px ${theme.spacing.lg}px`
+        }}>
+            <div style={{
+                maxWidth: 1000,
+                margin: "0 auto"
+            }}>
+                {/* Breadcrumb */}
+                <motion.div
+                    style={{
+                        marginBottom: theme.spacing.xl,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: theme.spacing.sm
+                    }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <button
+                        onClick={onNavigateHome}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: theme.colors.textSecondary,
+                            cursor: "pointer",
+                            fontSize: 14,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: theme.spacing.xs
+                        }}
+                    >
+                        ← Back to Home
+                    </button>
+                </motion.div>
+
+                {/* Cart Header */}
+                <motion.div
+                    style={{ marginBottom: theme.spacing.xxl }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                >
+                    <h1 style={{
+                        fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                        fontWeight: 900,
+                        fontFamily: theme.fonts.heading,
+                        color: theme.colors.textPrimary,
+                        margin: 0,
+                        marginBottom: theme.spacing.md,
+                        letterSpacing: "0.05em"
+                    }}>
+                        SHOPPING <span style={{ color: theme.colors.primary }}>CART</span>
+                    </h1>
+                    <p style={{
+                        fontSize: 16,
+                        color: theme.colors.textSecondary,
+                        margin: 0
+                    }}>
+                        {cartItems.length === 0 
+                            ? "Your cart is empty" 
+                            : `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} in your cart`
+                        }
+                    </p>
+                </motion.div>
+
+                {cartItems.length === 0 ? (
+                    /* Empty Cart State */
+                    <motion.div
+                        style={{
+                            textAlign: "center",
+                            padding: `${theme.spacing.xxl * 2}px ${theme.spacing.lg}px`,
+                            color: theme.colors.textMuted
+                        }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <div style={{
+                            fontSize: 80,
+                            marginBottom: theme.spacing.xl,
+                            opacity: 0.5
+                        }}>
+                            🛒
+                        </div>
+                        <h3 style={{ 
+                            fontSize: 28, 
+                            marginBottom: theme.spacing.md,
+                            color: theme.colors.textPrimary,
+                            fontFamily: theme.fonts.heading
+                        }}>
+                            Your cart is empty
+                        </h3>
+                        <p style={{
+                            fontSize: 16,
+                            marginBottom: theme.spacing.xl,
+                            maxWidth: 400,
+                            margin: `0 auto ${theme.spacing.xl}px`,
+                            lineHeight: 1.5
+                        }}>
+                            Add some F1-inspired streetwear to your cart and get ready to race in style!
+                        </p>
+                        <motion.button
+                            onClick={() => onNavigateToCategory("tees")}
+                            style={{
+                                ...styles.button.primary,
+                                fontSize: 16,
+                                padding: `${theme.spacing.md}px ${theme.spacing.xl}px`
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            SHOP TEES
+                        </motion.button>
+                    </motion.div>
+                ) : (
+                    /* Cart Items */
+                    <>
+                        <motion.div
+                            style={{
+                                marginBottom: theme.spacing.xxl
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                        >
+                            {cartItems.map((item, index) => (
+                                <CartItem
+                                    key={`${item.id}-${index}`}
+                                    item={item}
+                                    index={index}
+                                    onUpdateQuantity={updateQuantity}
+                                    onRemoveItem={removeItem}
+                                />
+                            ))}
+                        </motion.div>
+
+                        {/* Cart Summary */}
+                        <motion.div
+                            style={{
+                                borderTop: `2px solid ${theme.colors.border}`,
+                                paddingTop: theme.spacing.xl,
+                                marginTop: theme.spacing.xl
+                            }}
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.4 }}
+                        >
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: theme.spacing.xl,
+                                padding: `${theme.spacing.lg}px 0`
+                            }}>
+                                <h3 style={{
+                                    fontSize: 24,
+                                    fontWeight: 700,
+                                    color: theme.colors.textPrimary,
+                                    margin: 0,
+                                    fontFamily: theme.fonts.heading
+                                }}>
+                                    SUBTOTAL:
+                                </h3>
+                                <p style={{
+                                    fontSize: 32,
+                                    fontWeight: 900,
+                                    color: theme.colors.primary,
+                                    margin: 0,
+                                    fontFamily: theme.fonts.heading
+                                }}>
+                                    ${subtotal.toFixed(2)}
+                                </p>
+                            </div>
+
+                            <motion.button
+                                style={{
+                                    ...styles.button.primary,
+                                    width: "100%",
+                                    fontSize: 20,
+                                    padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
+                                    marginBottom: theme.spacing.md
+                                }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => {
+                                    // Placeholder for checkout functionality
+                                    alert(`Checkout functionality would process $${subtotal.toFixed(2)} worth of items!`)
+                                }}
+                            >
+                                CHECKOUT - ${subtotal.toFixed(2)}
+                            </motion.button>
+
+                            <motion.button
+                                onClick={() => onNavigateToCategory("tees")}
+                                style={{
+                                    ...styles.button.secondary,
+                                    width: "100%",
+                                    fontSize: 16,
+                                    padding: `${theme.spacing.md}px ${theme.spacing.lg}px`
+                                }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                CONTINUE SHOPPING
+                            </motion.button>
+                        </motion.div>
+                    </>
+                )}
+            </div>
+        </div>
+    )
+}
+
+// Cart Item Component
+interface CartItemProps {
+    item: {
+        id: number;
+        name: string;
+        price: number;
+        image: string;
+        category: string;
+        description?: string;
+        quantity: number;
+    };
+    index: number;
+    onUpdateQuantity: (itemId: number, newQuantity: number) => void;
+    onRemoveItem: (itemId: number) => void;
+}
+
+export const CartItem = ({ item, index, onUpdateQuantity, onRemoveItem }: CartItemProps) => {
+    // Array of placeholder images/emojis for different tee styles
+    const teeImages = ["👕", "🏎️", "🏁", "⚡", "🔥", "💨", "🎯", "⭐", "🎪"];
+    const imageIndex = item.id % teeImages.length;
+
+    return (
+        <motion.div
+            style={{
+                display: "flex",
+                gap: theme.spacing.lg,
+                padding: theme.spacing.lg,
+                backgroundColor: theme.colors.surface,
+                borderRadius: theme.borderRadius.lg,
+                border: `1px solid ${theme.colors.border}`,
+                marginBottom: theme.spacing.lg,
+                alignItems: "center"
+            }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
+            whileHover={{ 
+                boxShadow: theme.shadows.lg,
+                borderColor: theme.colors.primary + "30"
+            }}
+        >
+            {/* Product Image */}
+            <div style={{
+                width: 120,
+                height: 120,
+                backgroundColor: theme.colors.surfaceElevated,
+                borderRadius: theme.borderRadius.md,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                background: `linear-gradient(135deg, ${theme.colors.surfaceElevated} 0%, ${theme.colors.surface} 100%)`
+            }}>
+                <div style={{
+                    fontSize: 40,
+                    opacity: 0.8,
+                    transform: `rotate(${(item.id * 5) % 20 - 10}deg)`
+                }}>
+                    {teeImages[imageIndex]}
+                </div>
+            </div>
+
+            {/* Product Info */}
+            <div style={{
+                flex: 1,
+                minWidth: 0 // Allow text to wrap
+            }}>
+                <h3 style={{
+                    margin: 0,
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: theme.colors.textPrimary,
+                    marginBottom: theme.spacing.xs
+                }}>
+                    {item.name}
+                </h3>
+                <p style={{
+                    margin: 0,
+                    fontSize: 14,
+                    color: theme.colors.textSecondary,
+                    marginBottom: theme.spacing.sm
+                }}>
+                    {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                </p>
+                <p style={{
+                    margin: 0,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: theme.colors.primary
+                }}>
+                    ${item.price}
+                </p>
+            </div>
+
+            {/* Quantity Controls */}
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: theme.spacing.md
+            }}>
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: theme.spacing.sm,
+                    backgroundColor: theme.colors.surfaceElevated,
+                    borderRadius: theme.borderRadius.md,
+                    padding: theme.spacing.xs
+                }}>
+                    <motion.button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        style={{
+                            width: 32,
+                            height: 32,
+                            border: `1px solid ${theme.colors.border}`,
+                            backgroundColor: "transparent",
+                            color: theme.colors.textPrimary,
+                            borderRadius: theme.borderRadius.sm,
+                            fontSize: 16,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                        }}
+                        whileHover={{ backgroundColor: theme.colors.surface }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        −
+                    </motion.button>
+                    <span style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        color: theme.colors.textPrimary,
+                        minWidth: 30,
+                        textAlign: "center"
+                    }}>
+                        {item.quantity}
+                    </span>
+                    <motion.button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        style={{
+                            width: 32,
+                            height: 32,
+                            border: `1px solid ${theme.colors.border}`,
+                            backgroundColor: "transparent",
+                            color: theme.colors.textPrimary,
+                            borderRadius: theme.borderRadius.sm,
+                            fontSize: 16,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                        }}
+                        whileHover={{ backgroundColor: theme.colors.surface }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        +
+                    </motion.button>
+                </div>
+
+                {/* Total Price for this item */}
+                <p style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: theme.colors.primary
+                }}>
+                    ${(item.price * item.quantity).toFixed(2)}
+                </p>
+            </div>
+
+            {/* Remove Button */}
+            <motion.button
+                onClick={() => onRemoveItem(item.id)}
+                style={{
+                    width: 40,
+                    height: 40,
+                    border: `1px solid ${theme.colors.border}`,
+                    backgroundColor: "transparent",
+                    color: theme.colors.textMuted,
+                    borderRadius: theme.borderRadius.sm,
+                    fontSize: 18,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0
+                }}
+                whileHover={{ 
+                    backgroundColor: theme.colors.primary + "20",
+                    color: theme.colors.primary,
+                    borderColor: theme.colors.primary
+                }}
+                whileTap={{ scale: 0.95 }}
+                title="Remove item"
+            >
+                🗑️
+            </motion.button>
+        </motion.div>
     )
 }

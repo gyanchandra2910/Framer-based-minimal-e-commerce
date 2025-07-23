@@ -8,6 +8,16 @@ export interface Product {
     description?: string;
 }
 
+export interface CartItem {
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    description?: string;
+    quantity: number;
+}
+
 export interface Category {
     id: string;
     name: string;
@@ -18,7 +28,7 @@ export interface Category {
 
 // Global state management
 export const store = {
-    cart: [] as Product[],
+    cart: [] as CartItem[],
     user: null,
     currentPage: "home" as string,
     selectedCategory: null as string | null,
@@ -161,7 +171,33 @@ export const store = {
     },
     
     addToCart: (product: Product) => {
-        store.cart = [...store.cart, product];
+        // Check if item already exists in cart
+        const existingItem = store.cart.find(item => item.id === product.id);
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            // Add new item with quantity 1
+            const cartItem: CartItem = {
+                ...product,
+                quantity: 1
+            };
+            store.cart = [...store.cart, cartItem];
+        }
+    },
+    
+    removeFromCart: (productId: number) => {
+        store.cart = store.cart.filter(item => item.id !== productId);
+    },
+    
+    updateCartItemQuantity: (productId: number, newQuantity: number) => {
+        const item = store.cart.find(item => item.id === productId);
+        if (item) {
+            item.quantity = newQuantity;
+        }
+    },
+    
+    clearCart: () => {
+        store.cart = [];
     },
     
     setCurrentPage: (page: string) => {
